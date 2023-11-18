@@ -36,9 +36,10 @@ def init_db():
   Base.metadata.create_all(bind=engine)
 
 def add_sentence_to_db(sentence):
-  SessionLocal.add(sentence)
-  SessionLocal.commit()
-  SessionLocal.close()
+  session = SessionLocal()
+  session.add(sentence)
+  session.commit()
+  session.close()
 
 init_db()
 

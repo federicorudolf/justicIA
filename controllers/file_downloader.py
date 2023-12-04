@@ -13,21 +13,20 @@ def download_files(urls_and_filenames, directory):
     if not os.path.exists(directory):
       os.makedirs(directory)
     file_path = os.path.join(directory, filename)
-    print('File path: ', file_path)
+    print('Descargando sentencia: ', file_path)
     if not file_path.lower().endswith('.pdf'):
       file_path += '.pdf'
 
-    # Download the PDF
     response = requests.get(url, stream=True, verify=False)
     if response.status_code == 200 and 'application/pdf' in response.headers.get('Content-Type', ''):
       with open(file_path, 'wb') as file:
         for chunk in response.iter_content(chunk_size=1024):
           if chunk:
             file.write(chunk)
-      print(f"PDF saved to {file_path}")
+      print(f"PDF guardado en {file_path}")
       file_paths.append(file_path)
     else:
-      print(f"Failed to download PDF. Status code: {response.status_code}, Content-Type: {response.headers.get('Content-Type')}")
+      print(f"Hubo un problema guardando el PDF. Codigo del error: {response.status_code}, Content-Type: {response.headers.get('Content-Type')}")
   return file_paths
   
 def get_file_paths(directory):

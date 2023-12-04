@@ -7,7 +7,7 @@ def load_data(url):
   driver = webdriver.Chrome()
   driver.get(url)
   buttons = WebDriverWait(driver, 10).until(
-      EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button[id^='btnFallo']"))
+    EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button[id^='btnFallo']"))
   )
   links = driver.find_elements(By.CSS_SELECTOR, "a[title='Ver Fallo']")
   sentences = []

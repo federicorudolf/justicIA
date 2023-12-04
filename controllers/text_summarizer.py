@@ -11,17 +11,17 @@ client = OpenAI(
 
 def summarize_text(text):
     response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-3.5-turbo-1106",
     messages=[
         {
             "role": "user",
             "content": f"""
-            Sos un abogado especialista en justicia federal. Necesito que analices la siguiente sentencia de la Corte Superema de Justicia de la Nación, me la resumas y me digas que fue lo que se resolvió.
+            Sos un abogado especialista en justicia federal. Necesito que analices la siguiente sentencia de la Corte Superema de Justicia de la Nación, me la resumas en no más de 100 palabras y me digas que fue lo que se resolvió.
             Además quiero que lo devuelvas en un formato como el siguiente: 
-            1. Título de la sentencia
-            2. Involucrados en la causa
-            3. Resolución
-            4. Resumen ejecutivo (no más de 150 palabras)
+            1. *Título de la sentencia*:
+            2. *Involucrados en la causa*:
+            3. *Resolución*:
+            4. *Resumen ejecutivo*:
             : {text}"""
         }
     ]

@@ -3,14 +3,15 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
-from models.Sentence import Sentence
-from models.Sentence import Base
+from models.Sentence import Sentence, Base
 from controllers.pdf_text_extractor import extract_text_from_file
-from controllers.text_summarizer import summarize_text
+from controllers.text_summarizer import summarize_text, get_title
 from controllers.telegram_publisher import send_telegram_message
 from controllers.load_data import load_data
 from controllers.file_downloader import download_files, setup_download_path, get_file_paths
-# from controllers.save_data import add_sentence_to_db
+# import logging
+
+# logging.basicConfig(level=logging.DEBUG)
 
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -37,16 +38,20 @@ def init_db():
 
 def add_sentence_to_db(sentence):
   session = SessionLocal()
-  session.add(sentence)
-  session.commit()
-  session.close()
+  try:
+    session.add(sentence)
+    session.commit()
+  except Exception as e:
+    session.rollback()
+  finally:
+    session.close()
 
 init_db()
 
 for index, url in enumerate(pdfUrls):
   url_and_filenames.append((url, f'sentencia_{buttonIds[index][0]}.pdf', buttonIds[index][0]))
   filenames.append(f'sentencia_{buttonIds[index][0]}.pdf')
-  sentencias.append(Sentence(url=url, id=buttonIds[index][0], sentence_title='', pdf_url='', full_text='', summary_text='' ))
+  sentencias.append(Sentence(url=url, id=buttonIds[index][0], sentence_title='', pdf_url='', full_text='', summary_text=''))
 
 for sentencia in filenames:
   if sentencia not in downloaded_sentencias:
@@ -67,22 +72,28 @@ else:
     print('Descargando nuevas sentencias...')
     file_paths = download_files(filtered_url_and_filenames, sentencias_folder)
   else:
-    # Acá debemos chequear vs base de datos
     print('Obteniendo rutas de archivos ...')
     file_paths = get_file_paths(sentencias_folder)
 
   print('Vamos a resumir y publicar las siguientes sentencias: ', file_paths)
 
-  for path in file_paths:
-    id = path.split('sentencia_')[1].split('.')[0]
-    print('Extrayendo texto de la sentencia ', id)
-    text = extract_text_from_file(path)
-    summary = summarize_text(text)
-    print('El resumen de la sentencia es: ', summary)
-    send_telegram_message(summary)
-    for sentence in sentencias:
-      if sentence.id == id:
+  session = SessionLocal()
+  try:
+    for path in file_paths:
+      id = path.split('sentencia_')[1].split('.')[0]
+      print('Extrayendo texto de la sentencia ', id)
+      text = extract_text_from_file(path)
+      summary = summarize_text(text)
+      print('El resumen de la sentencia es: ', summary)
+      send_telegram_message(summary)
+      sentence = session.query(Sentence).filter_by(id=id).first()
+      
+      if sentence:
+        sentence.pdf_url = path
+        sentence.title = get_title(summary)
         sentence.full_text = text
-        sentence.summary = summary
+        sentence.summary_text = summary
         print('Nueva sentencia para guardar en la base de datos: ', sentence)
-        # add_sentence_to_db(sentence)
+        add_sentence_to_db(sentence)
+  finally:
+    session.close()

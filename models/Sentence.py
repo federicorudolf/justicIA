@@ -13,4 +13,3 @@ class Sentence(Base):
     full_text = Column(Text)
     summary_text = Column(Text)
     date_created = Column(DateTime, default=datetime.utcnow)
-

@@ -24,18 +24,19 @@ def get_title(text):
 
 def summarize_text(text):
     response = client.chat.completions.create(
-      model="gpt-3.5-turbo-1106",
+      model="gpt-4o",
       messages=[
         {
           "role": "user",
           "content": f"""
           Sos un abogado especialista en justicia federal. Necesito que analices la siguiente sentencia de la Corte Superema de Justicia de la Nación, me la resumas en no más de 100 palabras y me digas que fue lo que se resolvió.
           Además quiero que lo devuelvas en un formato como el siguiente:
-          **Nueva sentencia disponible**
-          1. 📜 **Título de la sentencia**:
-          2. 🕵🏻‍♀️ **Involucrados en la causa**:
-          3. 👨🏻‍⚖️ **Resolución**:
-          4. 📌 **Resumen ejecutivo**:
+          *Nueva sentencia disponible: *
+          
+          1. 📜 *Título de la sentencia*:
+          2. 🕵🏻‍♀️ *Involucrados*:
+          3. 👨🏻‍⚖️ *Resolución*:
+          4. 📌 *Resumen ejecutivo*:
           : {text}"""
         }
       ]

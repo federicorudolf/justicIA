@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -9,8 +10,8 @@ from controllers.text_summarizer import summarize_text, get_title
 from controllers.telegram_publisher import send_telegram_message
 from controllers.load_data import load_data
 from controllers.file_downloader import download_files, setup_download_path, get_file_paths
-# import logging
 
+# import logging
 # logging.basicConfig(level=logging.DEBUG)
 
 load_dotenv()
@@ -32,6 +33,8 @@ downloaded_sentencias = os.listdir(sentencias_folder)
 print('Las sentencias se guardan en:', sentencias_folder)
 sentencias_to_download = []
 sentencias = []
+
+start_time = time.time()
 
 def init_db():
   Base.metadata.create_all(bind=engine)
@@ -84,6 +87,7 @@ else:
       print('Extrayendo texto de la sentencia ', id)
       text = extract_text_from_file(path)
       summary = summarize_text(text)
+      print('El texto a resumir es:', text)
       print('El resumen de la sentencia es: ', summary)
       send_telegram_message(summary)
       sentence = session.query(Sentence).filter_by(id=id).first()
@@ -97,3 +101,7 @@ else:
         add_sentence_to_db(sentence)
   finally:
     session.close()
+
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"Tiempo de ejecución: {execution_time} segundos")

@@ -12,8 +12,11 @@ client = OpenAI(
 
 def get_title(text):
   pattern = r'\*Título de la sentencia\*:\s*(.*?)\n2\.'
+  alternative_patter = r'\*\*Título de la sentencia\*\*:\s*(.*?)(?=\.\n|\n\d\.)'
   # Search for the pattern in the text
   match = re.search(pattern, text, re.DOTALL)
+  if not match:
+    match = re.search(alternative_patter, text, re.DOTALL)
 
   # Extract the title if the pattern matches
   if match:
@@ -37,6 +40,7 @@ def summarize_text(text):
           2. 🕵🏻‍♀️ *Involucrados*:
           3. 👨🏻‍⚖️ *Resolución*:
           4. 📌 *Resumen ejecutivo*:
+          5. ✍🏻 *Firmado por*:
           : {text}"""
         }
       ]

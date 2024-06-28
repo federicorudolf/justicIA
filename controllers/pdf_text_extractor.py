@@ -27,7 +27,6 @@ def extract_text_from_local_pdf(pdf_path):
         return text
     
 def extract_text_from_file(pdf_path):
-    print('Extracting: ', pdf_path)
     text = ""
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:

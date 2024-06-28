@@ -11,9 +11,6 @@ from controllers.telegram_publisher import send_telegram_message
 from controllers.load_data import load_data
 from controllers.file_downloader import download_files, setup_download_path, get_file_paths
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
-
 load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 DOWNLOAD_DIR = "https://sjconsulta.csjn.gov.ar/sjconsulta/novedades/consulta.html"
@@ -44,8 +41,10 @@ def add_sentence_to_db(sentence):
   try:
     session.add(sentence)
     session.commit()
+    print('Sentencia guardada correctamente')
   except Exception as e:
     session.rollback()
+    print('Error guardando sentencia', e)
   finally:
     session.close()
 
@@ -87,16 +86,14 @@ else:
       print('Extrayendo texto de la sentencia ', id)
       text = extract_text_from_file(path)
       summary = summarize_text(text)
-      print('El texto a resumir es:', text)
+      title = get_title(summary)
+      url = [url for url, _, id in filtered_url_and_filenames if id == id]
+      print("Titulo de la sentencia: ", title)
+      print("Url de la sentencia: ", url[0])
       print('El resumen de la sentencia es: ', summary)
-      send_telegram_message(summary)
-      sentence = session.query(Sentence).filter_by(id=id).first()
-      
+      send_telegram_message(summary, url[0], id)
+      sentence = Sentence(url=url, id=id, sentence_title=title, pdf_url=path, full_text=text, summary_text=summary)
       if sentence:
-        sentence.pdf_url = path
-        sentence.title = get_title(summary)
-        sentence.full_text = text
-        sentence.summary_text = summary
         print('Nueva sentencia para guardar en la base de datos: ', sentence)
         add_sentence_to_db(sentence)
   finally:

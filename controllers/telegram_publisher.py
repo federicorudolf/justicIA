@@ -7,13 +7,18 @@ load_dotenv()
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = '@justicIA_arg'
 
-def send_telegram_message(message):
-  text = format_text(message)
-  print(f"Telegram text: {text}")
+def send_telegram_message(message, url, id):
+  urlMessage = f"_Para viusualizar la sentencia {id} completa podes ir acá {url}_"
+  text = f"""
+  {message}
+
+
+  {urlMessage}
+"""
   url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
   payload = {
     "chat_id": CHAT_ID,
-    "text": message,
+    "text": text if url else message,
     "parse_mode": "Markdown"
   }
   response = requests.post(url, json=payload)
